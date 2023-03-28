@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571328, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -169,7 +169,19 @@ MonoBehaviour:
   mapWidth: 20
   mapHeight: 20
   noiseScale: 0.3
+  octaves: 0
+  persistence: 0
+  lacunarity: 1
+  seed: 0
+  offset: {x: 0, y: 0}
   autoUpdate: 0
+  regions:
+  - name: Water
+    height: 0.4
+    color: {r: 0.16353686, g: 0.42215183, b: 0.7075472, a: 0}
+  - name: Land
+    height: 1
+    color: {r: 0.20784295, g: 0.5943396, b: 0.15979885, a: 0}
 --- !u!4 &243903892
 Transform:
   m_ObjectHideFlags: 0
