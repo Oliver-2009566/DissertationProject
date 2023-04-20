@@ -18,9 +18,9 @@ public class MapGeneratorEditor : Editor
             }
         }
 
-        if (GUILayout.Button("Generate"))
+        if (GUILayout.Button("Generate New Map"))
         {
-            mapGen.GenerateMap();
+            mapGen.GenerateNewMap();
         }
     }
 }

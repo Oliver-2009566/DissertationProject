@@ -32,8 +32,16 @@ public class MapGenerator : MonoBehaviour
     void Awake()
     {
         falloffMap = FalloffGenerator.GenerateFalloffMap(mapSize);
+        GenerateNewMap();
     }
 
+    public void GenerateNewMap()
+    {
+        lacunarity = Random.Range(1.9f, 2.1f);
+        meshHeightMultiplier = Random.Range(10f, 30f);
+        seed = Random.Range(0, 1000000000);
+        GenerateMap();
+    }
     public void GenerateMap()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, mapSize, seed, noiseScale, octaves, persistence, lacunarity, offset);
