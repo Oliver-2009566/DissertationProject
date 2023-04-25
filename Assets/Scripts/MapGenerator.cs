@@ -28,6 +28,7 @@ public class MapGenerator : MonoBehaviour
     public TerrainType[] regions;
 
     float[,] falloffMap;
+    public GameObject plantPrefab;
 
     void Awake()
     {
@@ -45,6 +46,18 @@ public class MapGenerator : MonoBehaviour
     public void GenerateMap()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, mapSize, seed, noiseScale, octaves, persistence, lacunarity, offset);
+
+        for (int i = 0; i < 20; i++)
+        {
+            int xPos = Random.Range(0, noiseMap.GetLength(0));
+            int yPos = Random.Range(0, noiseMap.GetLength(1));
+            Debug.Log(xPos);
+            Debug.Log(yPos);
+            Vector3 plantPosition = new Vector3(xPos - 125, meshHeightCurve.Evaluate(noiseMap[xPos, yPos]) * meshHeightMultiplier, yPos - 125);
+
+            GameObject plant = Instantiate(plantPrefab);
+            plant.transform.localPosition = plantPosition;
+        }
 
         Color[] colorMap = new Color[mapSize * mapSize];
         for(int y = 0; y < mapSize; y++)

@@ -11,13 +11,13 @@ public class LSystem
     private Dictionary<string, Action<Turtle>> turtleCommands;
     private Turtle turtle;
 
-    public LSystem(string axiom, Dictionary<string, string> ruleset, Dictionary<string, Action<Turtle>> turtleCommands, Vector3 initialPos)
+    public LSystem(string axiom, Dictionary<string, string> ruleset, Dictionary<string, Action<Turtle>> turtleCommands, Vector3 initialPos, GameObject branchPrefab)
     {
         this.sentence = axiom;
         this.ruleset = ruleset;
         this.turtleCommands = turtleCommands;
 
-        turtle = new Turtle(initialPos);
+        turtle = new Turtle(initialPos, branchPrefab);
     }
 
     public void DrawSystem()

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Turtle
+public class Turtle : MonoBehaviour
 {
     private class TurtleTransform
     {
@@ -16,21 +16,30 @@ public class Turtle
         }
     }
 
+
     public Vector3 Position{get; private set;}
     public Quaternion Orientation{get; private set;}
 
     private Stack<TurtleTransform> stack = new Stack<TurtleTransform>();
 
-    public Turtle(Vector3 position)
+    private GameObject branchPrefab;
+    public Turtle(Vector3 position, GameObject branchPrefab)
     {
         Position = position;
+        this.branchPrefab = branchPrefab;
     }
 
 
     public void Translate(Vector3 delta)
     {
         delta = Orientation * delta;
-        Debug.DrawLine(Position, Position + delta, Color.black, 100f);
+        GameObject branch = Instantiate(branchPrefab);
+        var points = new Vector3[2];
+        branch.transform.localPosition = Position;
+        points[0] = Position;
+        points[1] = Position + delta;
+        branch.GetComponent<LineRenderer>().SetPositions(points);
+
         Position += delta;
     }
 
