@@ -34,9 +34,16 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Alpha: 0.46
     - _QueueControl: 0
     - _QueueOffset: 0
-    m_Colors: []
+    - _RippleDensity: 100
+    - _RippleSlimness: 5
+    - _RippleSpeed: 1
+    - _WaveSpeed: 0.1
+    m_Colors:
+    - _BaseColor: {r: 0.24056596, g: 0.53090096, b: 1, a: 0}
+    - _RippleColor: {r: 0.2901961, g: 1.498039, b: 1.662745, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &3577249727352561833
 MonoBehaviour:
