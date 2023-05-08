@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+// Draws either the noise/falloff/colour map, or the island mesh
+// With help from: https://www.youtube.com/watch?v=wbpMiKiSKm8&list=PLFt_AvWsXl0eBW2EiBtl_sxmDtSgZBxB3
 public class MapDisplay : MonoBehaviour
 {
     public Renderer textureRender;

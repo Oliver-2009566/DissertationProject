@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// This script generates the entire map, calling all the necessary functions that are needed to generate an island
+// With help from: https://www.youtube.com/watch?v=wbpMiKiSKm8&list=PLFt_AvWsXl0eBW2EiBtl_sxmDtSgZBxB3
 public class MapGenerator : MonoBehaviour
 {
     public enum DrawMode{NoiseMap, ColorMap, Mesh, FalloffMap};
@@ -30,12 +32,14 @@ public class MapGenerator : MonoBehaviour
     float[,] falloffMap;
     public GameObject plantPrefab;
 
+    // When the game is started, create a falloff map and generate a brand new island
     void Awake()
     {
         falloffMap = FalloffGenerator.GenerateFalloffMap(mapSize);
         GenerateNewMap();
     }
-
+    
+    // Randomises some values in order make a brand new island
     public void GenerateNewMap()
     {
         lacunarity = Random.Range(1.9f, 2.1f);
@@ -43,21 +47,11 @@ public class MapGenerator : MonoBehaviour
         seed = Random.Range(0, 1000000000);
         GenerateMap();
     }
+    // Creates a noise map, places L-System plant object around where they should be on the map
+    // Subtracts the falloff map if the variable useFalloff is true
     public void GenerateMap()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, mapSize, seed, noiseScale, octaves, persistence, lacunarity, offset);
-
-        for (int i = 0; i < 20; i++)
-        {
-            int xPos = Random.Range(0, noiseMap.GetLength(0));
-            int yPos = Random.Range(0, noiseMap.GetLength(1));
-            Debug.Log(xPos);
-            Debug.Log(yPos);
-            Vector3 plantPosition = new Vector3(xPos - 125, meshHeightCurve.Evaluate(noiseMap[xPos, yPos]) * meshHeightMultiplier, yPos - 125);
-
-            GameObject plant = Instantiate(plantPrefab);
-            plant.transform.localPosition = plantPosition;
-        }
 
         Color[] colorMap = new Color[mapSize * mapSize];
         for(int y = 0; y < mapSize; y++)
@@ -80,6 +74,32 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
+        GameObject[] plants = GameObject.FindGameObjectsWithTag("Plant");
+        foreach(GameObject plant in plants)
+        GameObject.Destroy(plant);
+
+        bool planted = false;
+
+        for(int i = 0; i < 20; i++)
+        {
+            while(planted == false)
+            {
+                float topLeftX = (noiseMap.GetLength(0) - 1) / -2f;
+                float topLeftZ = (noiseMap.GetLength(1) - 1) / 2f;
+                int xPos = Random.Range(0, noiseMap.GetLength(0));
+                int zPos = Random.Range(0, noiseMap.GetLength(1));
+                if (noiseMap[xPos,zPos] > 0.5)
+                {
+                    Vector3 plantPosition = new Vector3((topLeftX + xPos) *  10, (meshHeightCurve.Evaluate(noiseMap[xPos,zPos]) * meshHeightMultiplier) * 10, (topLeftZ - zPos) * 10);
+                    GameObject plant = Instantiate(plantPrefab);
+                    plant.transform.localPosition = plantPosition;
+                    planted = true;
+                }     
+            }
+            planted = false;
+        }
+
+        // This calls one of a variety of different draw functions based on what setting the map generator is set to
         MapDisplay display = FindObjectOfType<MapDisplay> ();
         if(drawMode == DrawMode.NoiseMap)
         {
@@ -99,6 +119,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    // Whenever anything is edited in the inspector, it makes sure these variables are clamped
     void OnValidate()
     {
         if (mapSize < 1)
@@ -117,6 +138,7 @@ public class MapGenerator : MonoBehaviour
     }
 }
 
+// The struct which makes up the different terrain types used by the island
 [System.Serializable]
 public struct TerrainType
 {

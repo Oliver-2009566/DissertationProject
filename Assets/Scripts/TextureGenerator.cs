@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// This class creates both the noise map and colour map textures
+// With help from: https://youtu.be/RDQK1_SWFuc
 public static class TextureGenerator
 {
+    // Creates a 2d texture using a provided colour map and the size of the mesh
     public static Texture2D TextureFromColorMap(Color[] colorMap, int width, int height)
     {
         Texture2D texture = new Texture2D(width, height);
@@ -14,7 +17,7 @@ public static class TextureGenerator
         return texture;
     }
 
-
+    // Creates a perlin noise map using only the noise map values
     public static Texture2D TextureFromHeightMap(float[,] heightMap)
     {
         int width = heightMap.GetLength(0);

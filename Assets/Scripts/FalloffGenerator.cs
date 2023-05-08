@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Generates the falloff map based on the provided size of the map
+// With help from: https://youtu.be/COmtTyLCd6I
 public static class FalloffGenerator
 {
     public static float[,] GenerateFalloffMap(int size)
