@@ -32,6 +32,8 @@ public class MapGenerator : MonoBehaviour
     float[,] falloffMap;
     public GameObject plantPrefab;
 
+    private float waitTime = 2f;
+
     // When the game is started, create a falloff map and generate a brand new island
     void Awake()
     {
@@ -79,13 +81,13 @@ public class MapGenerator : MonoBehaviour
         GameObject.Destroy(plant);
 
         bool planted = false;
+        float topLeftX = (noiseMap.GetLength(0) - 1) / -2f;
+        float topLeftZ = (noiseMap.GetLength(1) - 1) / 2f;
 
         for(int i = 0; i < 20; i++)
         {
             while(planted == false)
             {
-                float topLeftX = (noiseMap.GetLength(0) - 1) / -2f;
-                float topLeftZ = (noiseMap.GetLength(1) - 1) / 2f;
                 int xPos = Random.Range(0, noiseMap.GetLength(0));
                 int zPos = Random.Range(0, noiseMap.GetLength(1));
                 if (noiseMap[xPos,zPos] > 0.5)
@@ -119,6 +121,94 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+
+    IEnumerator GenerateMapSlow()
+    {
+        lacunarity = Random.Range(1.9f, 2.1f);
+        meshHeightMultiplier = Random.Range(10f, 30f);
+        seed = Random.Range(0, 1000000000);
+
+        GameObject[] plants = GameObject.FindGameObjectsWithTag("Plant");
+        foreach(GameObject plant in plants)
+        GameObject.Destroy(plant);
+
+        GameObject water = GameObject.Find("Water");
+        GameObject mesh = GameObject.Find("Mesh");
+
+        water.GetComponent<Renderer>().enabled = false;
+        mesh.GetComponent<Renderer>().enabled = false;
+
+        MapDisplay display = FindObjectOfType<MapDisplay> ();
+
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, mapSize, seed, noiseScale, octaves, persistence, lacunarity, offset);
+        display.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));  
+
+
+        yield return new WaitForSeconds(waitTime);
+
+        Color[] colorMap = new Color[mapSize * mapSize];
+        for(int y = 0; y < mapSize; y++)
+        {
+            for(int x = 0; x < mapSize; x++)
+            {
+                if (useFalloff)
+                {
+                    noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] - falloffMap[x,y]);
+                }
+                float currentHeight = noiseMap[x, y];
+                for(int i = 0; i < regions.Length; i++)
+                {
+                    if(currentHeight <= regions[i].height)
+                    {
+                        colorMap[y * mapSize + x] = regions[i].color;
+                        break;
+                    }
+                }
+            }
+        }
+
+        display.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap)); 
+
+        yield return new WaitForSeconds(waitTime); 
+
+        display.DrawTexture(TextureGenerator.TextureFromColorMap(colorMap, mapSize, mapSize)); 
+
+        yield return new WaitForSeconds(waitTime);
+        
+        display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMultiplier, meshHeightCurve), TextureGenerator.TextureFromColorMap(colorMap, mapSize, mapSize));
+        mesh.GetComponent<Renderer>().enabled = true;
+
+        yield return new WaitForSeconds(waitTime);
+
+        bool planted = false;
+        float topLeftX = (noiseMap.GetLength(0) - 1) / -2f;
+        float topLeftZ = (noiseMap.GetLength(1) - 1) / 2f;
+
+        for(int i = 0; i < 20; i++)
+        {
+            while(planted == false)
+            {
+                int xPos = Random.Range(0, noiseMap.GetLength(0));
+                int zPos = Random.Range(0, noiseMap.GetLength(1));
+                if (noiseMap[xPos,zPos] > 0.5)
+                {
+                    Vector3 plantPosition = new Vector3((topLeftX + xPos) *  10, (meshHeightCurve.Evaluate(noiseMap[xPos,zPos]) * meshHeightMultiplier) * 10, (topLeftZ - zPos) * 10);
+                    GameObject plant = Instantiate(plantPrefab);
+                    plant.transform.localPosition = plantPosition;
+                    planted = true;
+                }     
+            }
+            planted = false;
+        }
+
+
+        yield return new WaitForSeconds(waitTime);
+
+        water.GetComponent<Renderer>().enabled = true;
+
+        yield return null;
+    }
+
     // Whenever anything is edited in the inspector, it makes sure these variables are clamped
     void OnValidate()
     {
@@ -136,6 +226,15 @@ public class MapGenerator : MonoBehaviour
         }
         falloffMap = FalloffGenerator.GenerateFalloffMap(mapSize);
     }
+
+    void Update()
+    {
+        if (Input.GetKeyDown("space"))
+        {
+            StartCoroutine(GenerateMapSlow());
+        }
+    }
+
 }
 
 // The struct which makes up the different terrain types used by the island
